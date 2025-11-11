@@ -1,17 +1,18 @@
-const imageUrl = "https://source.unsplash.com/random/2560x1600"
+const imageUrl = "https://picsum.photos/2560/1600"
 
 chrome.storage.local.get(['currentCover', 'initCover'], function (result) {
+  // Show cached image first for instant display
   if (result.currentCover || result.initCover) {
     if (result.currentCover) {
       setBg(result.currentCover)
     } else if (result.initCover) {
       setBg(result.initCover)
     }
-    fetchCurrentCover(false)
-  } else {
-    fetchCurrentCover(true)
   }
+  // Always fetch new image for next load
+  fetchCurrentCover(false)
 })
+
 function fetchCurrentCover(setImage) {
   fetch(imageUrl)
     .then(response => response.blob())

@@ -9,7 +9,10 @@
       "Bash(pnpm install:*)",
       "Bash(pnpm run build)",
       "Bash(NODE_OPTIONS=--openssl-legacy-provider pnpm run build:*)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
