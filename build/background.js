@@ -1,4 +1,4 @@
-const imageUrl = "https://source.unsplash.com/random/2560x1600"
+const imageUrl = "https://picsum.photos/2560/1600"
 chrome.runtime.onInstalled.addListener(function () {
   fetch(imageUrl)
     .then(response => response.blob())

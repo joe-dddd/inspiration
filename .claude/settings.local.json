@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(yarn build:*)",
+      "Bash(yarn install)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm run build)",
+      "Bash(NODE_OPTIONS=--openssl-legacy-provider pnpm run build:*)",
+      "WebFetch(domain:github.com)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
