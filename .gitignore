@@ -21,3 +21,6 @@ yarn-error.log*
 
 # Chrome extension zip packages
 *.zip
+
+# Build output
+/build

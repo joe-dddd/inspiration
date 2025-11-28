@@ -89,7 +89,7 @@ function preloadImage(url) {
   });
 }
 
-function loadCurrentCover(setImage, retryCount = 0) {
+function loadCurrentCover(applyBackground = true, retryCount = 0) {
   const { width, height } = getOptimalImageSize();
   // Use optimal size instead of fixed 2560x1600
   const imageUrl = `${BASE_IMAGE_URL}/${width}/${height}`;
@@ -98,10 +98,8 @@ function loadCurrentCover(setImage, retryCount = 0) {
   
   preloadImage(url)
     .then(loadedUrl => {
-      // Image is loaded, now set it as background with fade-in effect
-      // Only set if we have a cached image (for smooth transition) or if explicitly requested
-      const shouldSet = setImage || retryCount === 0;
-      if (shouldSet) {
+      // Image is loaded, now set it as background with fade-in effect when requested
+      if (applyBackground) {
         setBg(loadedUrl, true); // Use fade-in for smooth transition
       }
       // Store the URL and size for next time
@@ -116,7 +114,7 @@ function loadCurrentCover(setImage, retryCount = 0) {
       if (retryCount < MAX_RETRIES) {
         console.log(`Retrying image load (${retryCount + 1}/${MAX_RETRIES})...`);
         setTimeout(() => {
-          loadCurrentCover(setImage, retryCount + 1);
+          loadCurrentCover(applyBackground, retryCount + 1);
         }, RETRY_DELAY * (retryCount + 1)); // Exponential backoff
       } else {
         console.error("Max retries reached. Using cached image if available.");
@@ -125,24 +123,36 @@ function loadCurrentCover(setImage, retryCount = 0) {
 }
 
 chrome.storage.local.get(['currentCover', 'initCover'], function (result) {
+  const cachedUrl = result.currentCover || result.initCover;
+  const hasCachedCover = Boolean(cachedUrl);
+
+  // Decide whether the newly fetched image should immediately replace the current view
+  // If we already have a cached cover, keep it on screen to avoid an A->B flash.
+  let shouldApplyNewCover = !hasCachedCover;
+  const startLoadingNewCover = () => loadCurrentCover(shouldApplyNewCover);
+
   // Show cached image first for instant display
-  if (result.currentCover || result.initCover) {
-    const cachedUrl = result.currentCover || result.initCover;
+  if (hasCachedCover) {
     // For base64 images (old format), use as is
     // For URLs (new format), preload first to ensure it's ready
     if (cachedUrl.startsWith('data:')) {
       setBg(cachedUrl);
-    } else {
-      // It's a URL, preload it to ensure it's ready
-      preloadImage(cachedUrl)
-        .then(() => setBg(cachedUrl))
-        .catch(() => {
-          // If cached image fails, just set it anyway (browser will handle loading)
-          setBg(cachedUrl);
-        });
+      startLoadingNewCover();
+      return;
     }
+
+    // It's a URL, preload it to ensure it's ready
+    preloadImage(cachedUrl)
+      .then(() => setBg(cachedUrl))
+      .catch(() => {
+        // If cached image fails, allow the new image to replace it once ready
+        setBg(cachedUrl);
+        shouldApplyNewCover = true;
+      })
+      .finally(startLoadingNewCover);
+    return;
   }
-  // Load new image in background, will replace cached one when ready
-  // This allows cached image to show immediately while new one loads
-  loadCurrentCover(true);
+
+  // No cached cover, load and apply immediately
+  startLoadingNewCover();
 })
