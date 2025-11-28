@@ -7,7 +7,7 @@
   "chrome_url_overrides": {
     "newtab": "index.html"
   },
-  "permissions": ["storage"],
+  "permissions": ["storage", "clipboardWrite"],
   "host_permissions": ["https://picsum.photos/*"],
   "background": {
     "service_worker": "background.js"

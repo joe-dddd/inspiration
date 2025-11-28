@@ -1,6 +1,7 @@
 import yimingQuotes from "./yiming.json";
 import wangxingQuotes from "./wangxing.json";
 import bezos from "./bezos.json";
+import dontbesilentQuotes from "./dontbesilent.json";
 
 const quotesList = [
   {
@@ -14,6 +15,10 @@ const quotesList = [
   {
     quotes: bezos,
     author: "贝佐斯",
+  },
+  {
+    quotes: dontbesilentQuotes,
+    author: "dontbesilent",
   },
 ];
 export function randomQuote() {
