@@ -3,7 +3,7 @@
   "name": "inspiration",
   "author": "Qunhao",
   "description": "a Momentum-like extension with quotes from Chinese top entrepreneurs",
-  "version": "0.2",
+  "version": "0.2.1",
   "chrome_url_overrides": {
     "newtab": "index.html"
   },

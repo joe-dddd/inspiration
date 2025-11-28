@@ -1,0 +1,64 @@
+name: Build Extension Package
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build extension assets
+        run: pnpm run build
+
+      - name: Package extension zip
+        run: pnpm run zip
+
+      - name: Get version
+        id: get_version
+        run: echo "version=$(node -p \"require('./package.json').version\")" >> $GITHUB_OUTPUT
+
+      - name: Create fixed filename zip for release
+        run: cp inspiration-v${{ steps.get_version.outputs.version }}.zip inspiration-extension.zip
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: inspiration-extension
+          path: inspiration-v${{ steps.get_version.outputs.version }}.zip
+          if-no-files-found: error
+
+      - name: Publish nightly release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: nightly
+          name: Nightly build
+          prerelease: true
+          allowUpdates: true
+          removeArtifacts: true
+          artifacts: inspiration-extension.zip
+          artifactContentType: application/zip
+          body: |
+            Automated build from main branch commit ${{ github.sha }}.
+
